@@ -7,6 +7,7 @@ gmusic_import_txt_playlist [path-to-text-file]
 Possible options:
 
 -h,--help - help
+
 -v,--verbose - verbose output
 
 -t,--target-playlist-name - target playlist name on google music
