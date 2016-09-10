@@ -27,7 +27,9 @@ parser.add_argument('input_file', action="store", nargs=argparse.REMAINDER, help
 options = parser.parse_args()
 client = gmusicapi.clients.Mobileclient ()
 email = input("Google E-mail:")
-pass_from_env = os.environ['GMUSIC_PASSWD']
+pass_from_env = ''
+if 'GMUSIC_PASSWD' in os.environ:
+	pass_from_env = os.environ['GMUSIC_PASSWD']
 if pass_from_env:
 	passwd = pass_from_env
 else:
