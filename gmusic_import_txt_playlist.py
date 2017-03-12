@@ -20,7 +20,7 @@ albumInfoCache = dict ()
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-v', '--verbose', action="store_true", dest="verbose", help="Verbose output", default=False)
 parser.add_argument('-e', '--email', action="store", dest="email", help="User e-mail (otherwise asked)")
-parser.add_argument('-t', '--target_playlist_name', action="store", dest="playlist_name", help="Name of target playlist", default="New Playlist")
+parser.add_argument('-t', '--target_playlist_name', action="store", dest="playlist_name", help="Name of target playlist")
 parser.add_argument('--matching_style', action="store", dest="matching_style", help="Matching style for song/album/artist names (possible values: {})".format ([e.name for e in MatchingStyle]), default="substring")
 formats = ['{Artist} - {Album}', '{Artist} - {Song}', '{Album}', '{Song}', '{Artist}']
 parser.add_argument('-f', '--format', action="store", dest="fixed_format", help="Fix format for playlist items. You may use variables {{Artist}}, {{Album}}, {{Song}}. By default the following formats are checked: {}".format (formats))
@@ -30,9 +30,6 @@ client = gmusicapi.clients.Mobileclient ()
 email = options.email
 if not email:
 	email = input("Google E-mail:")
-playlist_name = options.playlist_name
-if not playlist_name:
-	playlist_name = input("Target Playlist Name:")
 
 pass_from_env = ''
 if 'GMUSIC_PASSWD' in os.environ:
@@ -43,6 +40,10 @@ else:
 	passwd = getpass.getpass("Password:")
 if not client.login(email, passwd, gmusicapi.clients.Mobileclient.FROM_MAC_ADDRESS):
 	sys.exit ("Login Failed.\nIf you use 2 step authentication you may need to generate app specific password on https://security.google.com/settings/security/apppasswords. If you don't want to remember it you may store password in GMUSIC_PASSWD environment variable, but don't forget to close terminal after usage")
+
+playlist_name = options.playlist_name
+if not playlist_name:
+	playlist_name = input("Target Playlist Name:")
 
 matching_style = MatchingStyle.substring
 
@@ -87,10 +88,21 @@ try: # to logout in any case
 	elif collision_count > 1:
 		print ('Warning: several playlists exist with the name "' + playlist_name + '". Continuing with creation of another one.')
 
-	def getAlbumYear (albumId):
-		global albumInfoCache
+	def getSongYear (song):
+		song_name = ' - '.join ([song['artist'], song['album'], song['title']])
+		if 'year' in song:
+			print_verbose ('Year for {0} is {1}'.format (song_name, song['year']))
+			return song['year']
+
+		albumId = song['albumId']
+		global albumIInfoCache
 		if not albumId in albumInfoCache:
-			albumInfoCache[albumId] = client.get_album_info (albumId, False)
+			print_verbose ('Loading info for album with id {0}'.format (albumId))
+			try:
+				albumInfoCache[albumId] = client.get_album_info (albumId, False)
+			except:
+				print ('Song year could not be determined for {0}'.format (song_name))
+				return 1970
 		return albumInfoCache[albumId]['year']
 
 	def checkMatch (matchingThis, againstThis):
@@ -103,7 +115,6 @@ try: # to logout in any case
 
 	def findByInfo (info):
 		tuple_list = []
-		# TODO: Sort by Year -> Album -> TrackNumber
 		for song in songs:
 			matched = True
 			if 'Song' in info and not checkMatch (info['Song'], song['title']):
@@ -114,7 +125,7 @@ try: # to logout in any case
 				matched = False
 			if matched:
 				print_verbose ('Matched: ' + ' - '.join ([song['artist'], song['album'], song['title']]))
-				tuple_list.append ((getAlbumYear (song['albumId']), song['album'], song['discNumber'], song['trackNumber'], song['id']))
+				tuple_list.append ((getSongYear (song), song['album'], song['discNumber'], song['trackNumber'], song['id']))
 		tuple_list.sort ()
 		return [i[-1] for i in tuple_list]
 
@@ -122,11 +133,13 @@ try: # to logout in any case
 	try:
 		with open(options.input_file[0], 'r') as f:
 			for line in f:
+				line = line.strip()
+				if not line: # skip empty lines
+					continue
 
 				def exit_when_line_not_parsable ():
 					exit_with_error ('Line "{}" was not parsed successfuly (maybe songs/albums are missing or format is wrong)'.format (line))
 
-				line = line[:-1]
 				print_verbose ('Resolving format for ' + line)
 				matched = False
 				if options.fixed_format:
