@@ -19,6 +19,7 @@ class MatchingStyle(Enum):
 albumInfoCache = dict ()
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-v', '--verbose', action="store_true", dest="verbose", help="Verbose output", default=False)
+parser.add_argument('-e', '--email', action="store", dest="email", help="User e-mail (otherwise asked)")
 parser.add_argument('-t', '--target_playlist_name', action="store", dest="playlist_name", help="Name of target playlist", default="New Playlist")
 parser.add_argument('--matching_style', action="store", dest="matching_style", help="Matching style for song/album/artist names (possible values: {})".format ([e.name for e in MatchingStyle]), default="substring")
 formats = ['{Artist} - {Album}', '{Artist} - {Song}', '{Album}', '{Song}', '{Artist}']
@@ -26,7 +27,9 @@ parser.add_argument('-f', '--format', action="store", dest="fixed_format", help=
 parser.add_argument('input_file', action="store", nargs=argparse.REMAINDER, help='text file path containing your playlist')
 options = parser.parse_args()
 client = gmusicapi.clients.Mobileclient ()
-email = input("Google E-mail:")
+email = options.email
+if not email:
+	email = input("Google E-mail:")
 pass_from_env = ''
 if 'GMUSIC_PASSWD' in os.environ:
 	pass_from_env = os.environ['GMUSIC_PASSWD']
