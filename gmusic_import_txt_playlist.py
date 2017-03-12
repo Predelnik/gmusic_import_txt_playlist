@@ -30,6 +30,10 @@ client = gmusicapi.clients.Mobileclient ()
 email = options.email
 if not email:
 	email = input("Google E-mail:")
+playlist_name = options.playlist_name
+if not playlist_name:
+	playlist_name = input("Target Playlist Name:")
+
 pass_from_env = ''
 if 'GMUSIC_PASSWD' in os.environ:
 	pass_from_env = os.environ['GMUSIC_PASSWD']
@@ -66,11 +70,11 @@ try: # to logout in any case
 	collided_id = None
 	further_action = Action.new
 	for playlist in playlists:
-		if playlist['name'] == options.playlist_name:
+		if playlist['name'] == playlist_name:
 			collision_count += 1
 			collided_id = playlist['id']
 	if collision_count == 1:
-		action = input ('Unique playlist with name "' + options.playlist_name + '" already exists.\nPlease choose subsequent action - overwrite(o)/append(a)/new(n):')
+		action = input ('Unique playlist with name "' + playlist_name + '" already exists.\nPlease choose subsequent action - overwrite(o)/append(a)/new(n):')
 		if action[0] == 'o':
 			further_action = Action.overwrite
 		elif action[0] == 'a':
@@ -81,7 +85,7 @@ try: # to logout in any case
 			exit_with_error ('Incorrect action was selected')
 		print ('The following action was selected: ' + further_action.name)
 	elif collision_count > 1:
-		print ('Warning: several playlists exist with the name "' + options.playlist_name + '". Continuing with creation of another one.')
+		print ('Warning: several playlists exist with the name "' + playlist_name + '". Continuing with creation of another one.')
 
 	def getAlbumYear (albumId):
 		global albumInfoCache
@@ -180,7 +184,7 @@ try: # to logout in any case
 
 	if further_action == Action.new:
 		print_verbose ('Creating New Playlist')
-		target_id = client.create_playlist (options.playlist_name)
+		target_id = client.create_playlist (playlist_name)
 
 	print_verbose ('Adding to playlist')
 	client.add_songs_to_playlist (target_id, id_list)
