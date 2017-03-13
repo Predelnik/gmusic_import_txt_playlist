@@ -1,17 +1,51 @@
 Simple utility script to import txt based playlist to google music based on https://github.com/simon-weber/gmusicapi
+Reason - creating playlist using Google Music UI is not convenient
 
-Usage:
-pip install -r requirements.txt (once)
-gmusic_import_txt_playlist [path-to-text-file]
+## Install
+```
+Unzip gmusic_import_txt_playlist.zip
+pip install -r requirements.txt
+```
 
+## Usage
+
+gmusic_import_txt_playlist [Path to text file containing desired playlist]
+
+## Options
+
+### -h, --help
+Display help message
+
+### -v,--verbose
+Enable verbose output
+
+### -e,--email
+Specify Google e-mail as an argument
+
+### -t,--target-playlist-name
+Name of playlsit you want to change/replace
+
+### -f,--format
+Fix format for parsing lines in txt file. {Artist}, {Album}, {Song} variables could be used. By default the following formats are checked.
+```
+{Artist} - {Album}
+{Artist} - {Song}
+{Album}
+{Song}
+{Artist}
+```
+
+If several formats could apply you will be explicitly asked.
+
+### --matching-style
 Possible options:
 
--h,--help - help
+  1. substring  - line may contain only substring of variable format
 
--v,--verbose - verbose output
+  2. exact_match - exact match required
 
--t,--target-playlist-name - target playlist name on google music
+## Details
 
--f,--format - format for parsing lines in txt file. {Artist}, {Album}, {Song} variables could be used. By default several common formats are tried.
+If several songs match the requested line they will be sorted in order of (artist name, album year, track number).
 
---matching-style - substring or exact_match. in substring mode script is satisfied if you input only substring of {Artist}, {Album}, etc. In exact_match exact match is required.
+If playlist with requested name already exists you will be asked to specify what action (overwrite/append/cancel) with it explicitly.
