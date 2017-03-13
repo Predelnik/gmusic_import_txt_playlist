@@ -16,6 +16,7 @@ class MatchingStyle(Enum):
 	substring = 0
 	exact_match = 1
 
+
 albumInfoCache = dict ()
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-v', '--verbose', action="store_true", dest="verbose", help="Verbose output", default=False)
@@ -26,6 +27,12 @@ formats = ['{Artist} - {Album}', '{Artist} - {Song}', '{Album}', '{Song}', '{Art
 parser.add_argument('-f', '--format', action="store", dest="fixed_format", help="Fix format for playlist items. You may use variables {{Artist}}, {{Album}}, {{Song}}. By default the following formats are checked: {}".format (formats))
 parser.add_argument('input_file', action="store", nargs=argparse.REMAINDER, help='text file path containing your playlist')
 options = parser.parse_args()
+
+if len (options.input_file) != 1:
+	print ('Please specify path to playlist file.')
+	parser.print_help()
+	exit (1)
+
 client = gmusicapi.clients.Mobileclient ()
 email = options.email
 if not email:
