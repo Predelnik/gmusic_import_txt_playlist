@@ -1,4 +1,5 @@
 Simple utility script to import txt based playlist to google music based on https://github.com/simon-weber/gmusicapi
+
 Reason - creating playlist using Google Music UI is not convenient
 
 ## Install
